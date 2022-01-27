@@ -1,67 +1,51 @@
 package test;
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+
 import org.junit.jupiter.api.Test;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 public class RestAssuredTest {
-    String url = "https://gorest.co.in/public-api";
-    String token = "89ce14201c7a904324e4085ad66430b9d1135f196f2563368c8f1cebcebd96b1";
+    String url = "https://jsonplaceholder.typicode.com";
     @Test
-    public void getUserPerName(){
-        given().
-            baseUri(url).
-            param("name", "Ronald Kessler").
-       when().
-            get("/users").
-       then().
-            statusCode(200).
-            body("data[0].email", equalTo("ronald.kessler@teste.com"));
-    }
-    @Test
-    public void getUserPerId()
-    {
-        RestAssured.baseURI = url;
-        RequestSpecification httpRequest = RestAssured.given();
-        Response response = httpRequest.get();
-        JsonPath jsonPathEvaluator = response.jsonPath();
-        String id = Integer.toString(jsonPathEvaluator.get("data[4].id"));
-
+    public void getUserPerName() {
         given().
                 baseUri(url).
-        when().
-                get(url + "/" + id + "/posts").
-        then().
+                param("name", "alias odio sit").
+                when().
+                get("/comments").
+                then().
                 statusCode(200).
-                body("data[0].body", equalTo("n"));
+                body("[0].email", equalTo("Lew@alysha.tv"));
     }
+
     @Test
-    public void createNewUser(){
-        url = "https://gorest.co.in/public/v1";
-        String requestBody = "{\"name\":\"Teste QA\", \"gender\":\"male\", \"email\":\"create.new@user.com\", \"status\":\"active\"}";
-        //criando um usuário
-        Response response =
-            given().
-                baseUri(url).
-                auth().
-                oauth2(token).
-                header("Content-type", "application/json").
+    public void post() {
+        String requestBody = "{\"name\":\"TESTE\",\"email\": \"TESTE@alysha.tv\",\"body\": \"teste body\"}";
+        given().
+                baseUri(url).header("Content-type", "application/json").
                 and().
                 body(requestBody).
-            when().
+                when().
                 post("/users").
-            then().
+                then().
                 statusCode(201).
-                extract().response();
-        String id = response.jsonPath().getString("data.id");
+                body("id", equalTo(11));
+    }
+    @Test
+    public void put() {
+        String requestBody = "{\"id\":11,\"name\":\"teste alteracao\",\"email\": \"teste@alteracao.tv\",\"body\": \"teste de alteração no body\"}";
+        String id = "1";
         given().
-                baseUri(url).
-        when().
-            get(url + "/" + id + "/posts").
-        then().
-            statusCode(200).body("data.nome", equalTo("Teste QA"));
+                baseUri(url).header("Content-type", "application/json").
+                and().
+                body(requestBody).
+                when().
+                put("/posts/" + id).
+                then().
+                statusCode(200).
+                body("name", equalTo("teste alteracao")).
+                body("email", equalTo("teste@alteracao.tv")).
+                body("body", equalTo("teste de alteração no body"));
     }
 }
